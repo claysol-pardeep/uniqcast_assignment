@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+    web:
+        build: .
+        command: npm run dev
+        volumes:
+            - .:/usr/app/
+            - /usr/app/node_modules
+        ports:
+            - '3000:3000'
+        depends_on:
+            - nats
+        environment:
+            NODE_ENV: development
+    nats:
+        image: 'nats:2.1.9'
+        #    entrypoint: "/gnatsd -DV"
+        #    entrypoint: "/nats-server -p 4222 -m 8888 "
+        expose:
+            - '4222'
+        ports:
+            - '8222:8222'
+        hostname: nats-server

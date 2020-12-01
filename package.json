@@ -1,0 +1,31 @@
+{
+  "name": "uniqcast",
+  "version": "1.0.0",
+  "description": "Assignment",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/claysol-pardeep/uniqcast_assignment.git"
+  },
+  "keywords": [
+    "Docker",
+    "Nodejs",
+    "NATS"
+  ],
+  "author": "Claysol Media Labs Pvt Ltd.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/claysol-pardeep/uniqcast_assignment/issues"
+  },
+  "homepage": "https://github.com/claysol-pardeep/uniqcast_assignment#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "nats": "^1.4.10-0"
+  }
+}
