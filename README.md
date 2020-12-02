@@ -43,11 +43,11 @@ npm run dev
 
 #### Docker Commands
 
-docker run -d -p 80:3000 -v ~/assets:/usr/src/app/assets --name node-app uniqcast
-docker volume create assets
-docker volume ls
-docker volume inspect assets
-docker-compose down
-docker-compose up
+- docker run -d -p 80:3000 -v ~/assets:/usr/src/app/assets --name node-app uniqcast
+- docker volume create assets
+- docker volume ls
+- docker volume inspect assets
+- docker-compose down
+- docker-compose up
 
-NATS Port : 0.0.0.0:8222 / 4222
+### NATS Port : 0.0.0.0:8222 / 4222
