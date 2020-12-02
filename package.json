@@ -7,6 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node app.js"
   },
+  "bin": {
+    "app": "./bin/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/claysol-pardeep/uniqcast_assignment.git"
@@ -23,9 +26,11 @@
   },
   "homepage": "https://github.com/claysol-pardeep/uniqcast_assignment#readme",
   "dependencies": {
+    "axios": "0.19",
     "body-parser": "^1.19.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
-    "nats": "^1.4.10-0"
+    "nats": "^1.4.10-0",
+    "yargs": "13.2"
   }
 }

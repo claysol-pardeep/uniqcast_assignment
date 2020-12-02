@@ -16,6 +16,7 @@ const nc = NATS.connect('nats://localhost:8222');
 
 router.post('/video', (req, res) => {
 	let source = req.body.file;
+	console.log(`source url is : ${source}`);
 	let target = '/Users/apple/assets/' + Date.now() + '.mp4';
 	fs.copyFile(source, target, (err) => {
 		if (err) throw err;
@@ -57,6 +58,7 @@ router.post('/video', (req, res) => {
 		});
 	});
 });
+
 app.use(router);
 const PORT = process.env.PORT || 3000;
 

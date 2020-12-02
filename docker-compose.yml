@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-    web:
+    api:
         build: .
         command: npm run dev
         volumes:
@@ -8,6 +8,8 @@ services:
             - /usr/app/node_modules
         ports:
             - '3000:3000'
+        links:
+            - nats
         depends_on:
             - nats
         environment:
