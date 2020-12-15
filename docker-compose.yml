@@ -4,8 +4,7 @@ services:
         build: .
         command: npm run dev
         volumes:
-            - .:/usr/app/
-            - /usr/app/node_modules
+            - backend:/usr/app/
         ports:
             - '3000:3000'
         links:
@@ -23,3 +22,5 @@ services:
         ports:
             - '8222:8222'
         hostname: nats-server
+volumes:
+  backend:

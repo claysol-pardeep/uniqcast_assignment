@@ -1,8 +1,20 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const router = express.Router();
+const debug = require('debug')('uniquecast:server');
+const path = require('path');
+const multer = require('multer');
+const serveIndex = require('serve-index');
 const fs = require('fs');
 const app = express();
+const NATS = require('nats');
+const servers = ['nats://localhost:4222', 'nats://localhost:8222', 'nats://nats.io:6222'];
+
+const nc = NATS.connect({ servers: servers });
+nc.on('connect', () => {
+	console.log('Connected to ' + nc.currentServer.url.host);
+});
+
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/x-www-form-urlencoded
@@ -11,9 +23,39 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-const NATS = require('nats');
-const nc = NATS.connect('nats://localhost:8222');
+var storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, './public/assets');
+	},
+	filename: (req, file, cb) => {
+		cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+	},
+});
 
+const upload = multer({ storage: storage });
+
+//get the router
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use('/ftp', express.static('public'), serveIndex('public', { icons: true }));
+
+app.get('/', function (req, res) {
+	return res.send('Welcome in UniqueCast Dev Program!');
+});
+
+// NATS Subscribe the Channel for testing the receive message.
+nc.subscribe('video-channel', function (msg) {
+	console.log('Received a message: ' + msg);
+});
+
+/* Micro-service that upload the file in docker mounted directory and return the file information */
+app.post('/upload', upload.single('file'), function (req, res) {
+	let url = req.hostname + ':3002/ftp/assets/' + req.file.filename;
+	nc.publish('video-channel', url);
+	return res.send(req.file);
+});
+
+/**** Outdated MP4 Processing with FFMPEG file processing ****/
 router.post('/video', (req, res) => {
 	let source = req.body.file;
 	console.log(`source url is : ${source}`);
@@ -60,7 +102,7 @@ router.post('/video', (req, res) => {
 });
 
 app.use(router);
-const PORT = process.env.PORT || 3000;
+const PORT = 3003;
 
 app.listen(PORT, () => {
 	console.log(`Server listening on port ${PORT}`);
