@@ -1,20 +1,41 @@
 version: '3.7'
 services:
     api:
-        build: .
-        command: npm run dev
-        volumes:
-            - backend:/usr/app/
-        ports:
-            - '3000:3000'
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: nodejs
+        container_name: API
+        #restart: unless-stopped
+        #env_file: .env
         links:
             - nats
         depends_on:
             - nats
+        ports:
+            - "3000:3000"
+        volumes:
+            - .:/usr/app
+            - node_modules:/usr/app/node_modules
+        command: npm run dev
         environment:
             NODE_ENV: development
+        networks:
+            - app-network
+    #PHP Service
+    app:
+        build:
+            dockerfile: php.Dockerfile
+            context: .
+        restart: always
+        container_name: frontend
+        volumes:
+            - "./frontend/:/var/www/html/"
+        ports:
+            - "8082:82"
     nats:
         image: 'nats:2.1.9'
+        container_name: nats
         #    entrypoint: "/gnatsd -DV"
         #    entrypoint: "/nats-server -p 4222 -m 8888 "
         expose:
@@ -22,5 +43,8 @@ services:
         ports:
             - '8222:8222'
         hostname: nats-server
+networks:
+        app-network:
+            driver: bridge
 volumes:
-  backend:
+    node_modules:
