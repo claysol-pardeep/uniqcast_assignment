@@ -8,24 +8,19 @@ const serveIndex = require('serve-index');
 const fs = require('fs');
 const app = express();
 const NATS = require('nats');
-const servers = ['nats://localhost:4222', 'nats://localhost:8222', 'nats://nats.io:6222'];
 
-const nc = NATS.connect({ servers: servers });
+nc = NATS.connect({ url: 'nats://nats:4222' });
+
 nc.on('connect', () => {
 	console.log('Connected to ' + nc.currentServer.url.host);
 });
 
-app.use(bodyParser.urlencoded({ extended: false }));
-
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// parse application/json
-app.use(bodyParser.json());
-
 var storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		cb(null, './public/assets');
+		cb(null, './public/');
 	},
 	filename: (req, file, cb) => {
 		cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
@@ -37,21 +32,23 @@ const upload = multer({ storage: storage });
 //get the router
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
 app.use('/ftp', express.static('public'), serveIndex('public', { icons: true }));
 
 app.get('/', function (req, res) {
-	return res.send('Welcome in UniqueCast Dev Program!');
+	nc.publish('channel', 'file data processing.');
+	return res.send('Welcome in UniqueCast Assignment!');
 });
 
 // NATS Subscribe the Channel for testing the receive message.
-nc.subscribe('video-channel', function (msg) {
-	console.log('Received a message: ' + msg);
-});
+// nc.subscribe('video-channel', function (msg) {
+// 	console.log('Received a message: ' + msg);
+// });
 
 /* Micro-service that upload the file in docker mounted directory and return the file information */
 app.post('/upload', upload.single('file'), function (req, res) {
-	let url = req.hostname + ':3002/ftp/assets/' + req.file.filename;
-	nc.publish('video-channel', url);
+	let url = req.hostname + ':3000/ftp/assets/' + req.file.filename;
+	//nc.publish('video-channel', url);
 	return res.send(req.file);
 });
 
@@ -92,7 +89,7 @@ router.post('/video', (req, res) => {
 					'Content-Length': fileSize,
 					'Content-Type': 'video/mp4',
 				};
-				nc.publish('video-channel', target);
+				nc.publish('channel', target);
 				res.writeHead(200, head);
 				fs.createReadStream(target).pipe(res);
 				///nc.unsubscribe(sid);
@@ -102,7 +99,7 @@ router.post('/video', (req, res) => {
 });
 
 app.use(router);
-const PORT = 3003;
+const PORT = 3000;
 
 app.listen(PORT, () => {
 	console.log(`Server listening on port ${PORT}`);

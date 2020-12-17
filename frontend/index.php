@@ -1,15 +1,18 @@
 <?php
+ini_set("upload_max_filesize", -1);
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Nats\Connection as NatsClient;
 
 try {
     $connectionOptions = new \Nats\ConnectionOptions();
-    $connectionOptions->setHost('127.0.0.1')->setPort(8222);
+    $connectionOptions->setHost('nats')->setPort(4222);
+    global $c;
     $c = new NatsClient($connectionOptions);
     $c->connect();
-    $sid = $c->subscribe(
-        'video-channel',
+    // Simple Subscriber.
+    $c->subscribe(
+        'channel',
         function ($message) {
             printf("Data: %s\r\n", $message->getBody());
         }
@@ -18,6 +21,7 @@ try {
 } catch (Exception $e) {
     // Exception handling
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -81,7 +85,7 @@ try {
             <div class="row">
                 <div class="col-md-8 m-auto pt-4">
                     <h1 class="text-center mb-5">UniqCast Video Upload</h1>
-                    <form id="upload_form" enctype="multipart/form-data" method="post">
+                    <form id="upload_form" name="upload_form" enctype="multipart/form-data" method="post">
                         <div class="form-group">
                             <label for="exampleFormControlInput1">File</label>
                             <div class="input-group">

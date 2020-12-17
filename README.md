@@ -19,9 +19,10 @@ Task to accept the local file path and return the docker mount volume video url.
 ```bash
 # Clone the repo
 git clone https://github.com/claysol-pardeep/uniqcast_assignment
-
-# Install node dependencies
-yarn
+git checkout php
+# Install dependencies
+cd frontend
+composer install
 ```
 
 #### 2. Run the App Local
@@ -47,7 +48,12 @@ npm run dev
 
 ### Frontend
 
-cd frontend
-composer install
+-   http://localhost:8082/
+
+### Backend
+
+-   http://localhost:3000/
 
 ### NATS Port : 0.0.0.0:8222 / 4222
+
+-   http://localhost:8222/
