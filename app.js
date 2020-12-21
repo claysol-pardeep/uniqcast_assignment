@@ -50,6 +50,9 @@ app.get('/', function (req, res) {
 		var seq = '0' + atom._seq;
 		seq = seq.substring(seq.length - 2, seq.length);
 		if (atom.type === 'moov') {
+			console.log(
+				`${seq}. |${new Array(atom._level * 3).join('-')}${atom.type}(size:${atom.size}, pos:${atom._pos})`
+			);
 			return readChunk(file, 0, atom._pos).then((fileData) => {
 				let filePath = 'uploads/convert-' + new Date().getTime() + '.mp4';
 				fs.writeFile(
