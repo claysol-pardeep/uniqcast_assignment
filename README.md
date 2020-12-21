@@ -44,7 +44,7 @@ npm run dev
 
 #### Docker Commands
 
--   docker-compose up
+-   docker-compose up -d
 
 ### Frontend
 

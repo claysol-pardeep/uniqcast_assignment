@@ -8,9 +8,10 @@ const serveIndex = require('serve-index');
 const fs = require('fs');
 const app = express();
 const NATS = require('nats');
-
-nc = NATS.connect({ url: 'nats://nats:4222' });
-
+const servers = ['nats://nats:4222', 'nats://nats:8222', 'nats://nats:6222'];
+var ffmpeg = require('fluent-ffmpeg');
+const nc = NATS.connect({ servers: servers });
+//const nc = NATS.connect();
 nc.on('connect', () => {
 	console.log('Connected to ' + nc.currentServer.url.host);
 });
@@ -33,22 +34,31 @@ const upload = multer({ storage: storage });
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use('/ftp', express.static('public'), serveIndex('public', { icons: true }));
-
+app.use('/ftp', express.static('frontend'), serveIndex('public', { icons: true }));
+app.post('/segment', function (req, res) {
+	return ffmpeg.ffprobe('uploads/1.mp4', function (err, metadata) {
+		return res.send(metadata);
+	});
+});
 app.get('/', function (req, res) {
-	nc.publish('channel', 'file data processing.');
+	nc.publish('video', 'file data processing.');
 	return res.send('Welcome in UniqueCast Assignment!');
 });
-
+nc.subscribe('record', function (msg) {
+	console.log('Received a message: ' + msg);
+});
 // NATS Subscribe the Channel for testing the receive message.
-// nc.subscribe('video-channel', function (msg) {
-// 	console.log('Received a message: ' + msg);
-// });
+nc.subscribe('video', function (msg) {
+	console.log('Received a message: ' + msg);
+	ffmpeg.ffprobe('uploads/1.mp4', function (err, metadata) {
+		nc.publish('record', JSON.stringify(metadata));
+	});
+});
 
 /* Micro-service that upload the file in docker mounted directory and return the file information */
 app.post('/upload', upload.single('file'), function (req, res) {
 	let url = req.hostname + ':3000/ftp/assets/' + req.file.filename;
-	//nc.publish('video-channel', url);
+	nc.publish('video-channel', url);
 	return res.send(req.file);
 });
 
@@ -81,7 +91,7 @@ router.post('/video', (req, res) => {
 					'Content-Length': chunksize,
 					'Content-Type': 'video/mp4',
 				};
-				nc.publish('video-channel', chunksize);
+				// nc.publish('video-channel', chunksize);
 				res.writeHead(206, head);
 				file.pipe(res);
 			} else {

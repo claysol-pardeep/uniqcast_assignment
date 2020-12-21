@@ -1,27 +1,34 @@
 <?php
-ini_set("upload_max_filesize", -1);
+/*
 require_once __DIR__ . '/vendor/autoload.php';
 
 use Nats\Connection as NatsClient;
+use Nats\ConnectionOptions as ConnectionOptions;
 
 try {
-    $connectionOptions = new \Nats\ConnectionOptions();
-    $connectionOptions->setHost('nats')->setPort(4222);
-    global $c;
-    $c = new NatsClient($connectionOptions);
-    $c->connect();
-    // Simple Subscriber.
-    $c->subscribe(
-        'channel',
+    $options = new ConnectionOptions();
+    $options->setHost('nats')->setPort(4222);
+
+    $client = new NatsClient($options);
+    $client->connect();
+    $client->subscribe(
+        'video',
         function ($message) {
             printf("Data: %s\r\n", $message->getBody());
         }
     );
-    $c->close();
-} catch (Exception $e) {
-    // Exception handling
-}
 
+    // Simple Publisher.
+    $client->publish('video', 'Marty McFly');
+
+    // Wait for 1 message.
+    $client->wait(1);
+} catch (Exception $e) {
+    echo "<pre>";
+    print_r($e);
+    exit;
+}
+*/
 ?>
 <!DOCTYPE html>
 <html lang="en">
