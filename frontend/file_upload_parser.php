@@ -13,9 +13,9 @@ if (!$fileData) { // if file not chosen
     echo "ERROR: There has something wrong with file upload size limit.";
     exit();
 }
-$fileNewName = "video-" . time() . ".mp4";
+$fileNewName = "video.mp4";
 if (move_uploaded_file($fileData, "uploads/" . $fileNewName)) {
-    $url = "public/" . $fileNewName;
+    $url = "uploads/" . $fileNewName;
     try {
         $options = new ConnectionOptions();
         $options->setHost('nats')->setPort(4222);

@@ -1,8 +1,7 @@
-import Atom from './atom';
-import stream from 'stream';
-import events from 'events';
+const Atom = require('./atom.js');
+const events = require('events');
 
-export default class MP4Parser extends events.EventEmitter {
+class MP4Parser extends events.EventEmitter {
 	constructor(_s) {
 		super();
 		this._s = _s;
@@ -338,3 +337,4 @@ MP4Parser.allKnownTypes = [
 	'rash',
 	'msrc',
 ];
+module.exports = MP4Parser;

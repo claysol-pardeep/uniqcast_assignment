@@ -17,11 +17,10 @@ services:
         volumes:
             - .:/usr/app
             - node_modules:/usr/app/node_modules
-        command: npm run dev
+        command: node --experimental-modules app.js
         environment:
             NODE_ENV: development
-        networks:
-            - app-network
+
     #PHP Service
     app:
         build:

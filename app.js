@@ -1,10 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const router = express.Router();
 const fs = require('fs');
 const readChunk = require('read-chunk');
-import MP4Parser from './mp4parser';
+const NATS = require('nats');
+const MP4Parser = require('./mp4parser.js');
+const router = express.Router();
 const app = express();
+
 //get the router
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -13,8 +15,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.urlencoded({ extended: false }));
 
 /* NATS Configuration */
-const NATS = require('nats');
-const servers = ['nats://localhost:4222', 'nats://localhost:8222', 'nats://localhost:6222'];
+const servers = ['nats://nats:4222']; // , 'nats://nats:8222', 'nats://nats:6222'
 const nc = NATS.connect({ servers: servers });
 nc.on('connect', () => {
 	console.log('Connected to ' + nc.currentServer.url.host);
@@ -26,18 +27,21 @@ nc.subscribe('video', function (file) {
 	parser.on('atom', (atom) => {
 		var seq = '0' + atom._seq;
 		seq = seq.substring(seq.length - 2, seq.length);
+		const filePath = './convert-' + new Date().getTime() + '.mp4';
+		console.log(
+			`${seq}. |${new Array(atom._level * 3).join('-')}${atom.type}(size:${atom.size}, pos:${atom._pos})`
+		);
 		if (atom.type === 'moov') {
-			return readChunk(file, 0, atom._pos).then((fileData) => {
-				let filePath = 'uploads/convert-' + new Date().getTime() + '.mp4';
-				fs.writeFile(filePath, fileData, function (err) {
-					if (err) return console.log(err);
-					return res.send({ filePath });
-				});
+			let status = readChunk(file, 0, atom._pos).then((fileData) => {
+				// fs.writeFile(filePath, fileData, function (err) {
+				// 	if (err) return console.log(err);
+				// });
 			});
 		}
+		nc.publish('video', filePath);
 	});
 	parser.on('data_mdat', (chunk) => {
-		//console.log(chunk.length);
+		// console.log(chunk.length);
 	});
 	parser.start();
 });

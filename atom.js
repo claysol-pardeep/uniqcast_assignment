@@ -1,4 +1,4 @@
-export default class Atom {
+class Atom {
 	constructor(size, type, pos, seq) {
 		this.size = size;
 		this.type = type;
@@ -17,3 +17,4 @@ export default class Atom {
 		atom._children.push(this);
 	}
 }
+module.exports = Atom;
